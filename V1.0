@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Partenaires - Centum T&S</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; min-height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        const consultantsData = [
+            { id: 1, code: "FLEGA", competences: ["Archi. électronique", "Safety", "Ing. Système"], secteurs: ["Aéronautique", "Défense", "Aérospatial"], seniorite: "Senior", experience: 8, disponibilite: "2026-02-20", disponibiliteLabel: "20 février 2026", tjmBase: 650 },
+            { id: 2, code: "MDUPO", competences: ["Concepteur HW", "Test & Mesure", "Validation"], secteurs: ["Automobile", "Aéronautique"], seniorite: "Confirmé", experience: 5, disponibilite: "2026-03-01", disponibiliteLabel: "1er mars 2026", tjmBase: 550 },
+            { id: 3, code: "PMART", competences: ["Ing. Système", "MBSE", "Requirements"], secteurs: ["Aérospatial"], seniorite: "Junior", experience: 2, disponibilite: "2026-03-15", disponibiliteLabel: "15 mars 2026", tjmBase: 420 },
+            { id: 4, code: "SBERN", competences: ["Archi. électronique", "EMC", "Certification"], secteurs: ["Défense", "Aéronautique", "Aérospatial"], seniorite: "Senior", experience: 12, disponibilite: "2026-02-10", disponibiliteLabel: "10 février 2026", tjmBase: 720 },
+            { id: 5, code: "TROUX", competences: ["Test & Mesure", "Banc de test", "LabVIEW"], secteurs: ["Automobile", "Aéronautique"], seniorite: "Confirmé", experience: 6, disponibilite: "2026-02-25", disponibiliteLabel: "25 février 2026", tjmBase: 580 },
+            { id: 6, code: "AGARC", competences: ["Software embarqué", "C/C++", "AUTOSAR"], secteurs: ["Automobile"], seniorite: "Senior", experience: 10, disponibilite: "2026-02-17", disponibiliteLabel: "17 février 2026", tjmBase: 680 },
+            { id: 7, code: "LMONN", competences: ["Certification DO-178", "Safety", "ARP4754"], secteurs: ["Aéronautique", "Aérospatial"], seniorite: "Senior", experience: 15, disponibilite: "2026-03-03", disponibiliteLabel: "3 mars 2026", tjmBase: 750 },
+            { id: 8, code: "JDURA", competences: ["Mécatronique", "Simulation", "CATIA"], secteurs: ["Automobile", "Aéronautique"], seniorite: "Confirmé", experience: 4, disponibilite: "2026-02-12", disponibiliteLabel: "12 février 2026", tjmBase: 520 },
+            { id: 9, code: "CVASS", competences: ["Radar", "Traitement signal", "RF"], secteurs: ["Défense"], seniorite: "Senior", experience: 11, disponibilite: "2026-03-10", disponibiliteLabel: "10 mars 2026", tjmBase: 700 },
+            { id: 10, code: "NBOUD", competences: ["Ing. Système", "SysML", "DOORS"], secteurs: ["Aérospatial", "Défense"], seniorite: "Confirmé", experience: 7, disponibilite: "2026-02-28", disponibiliteLabel: "28 février 2026", tjmBase: 590 },
+            { id: 11, code: "RFONT", competences: ["Validation", "HIL", "Banc de test"], secteurs: ["Automobile"], seniorite: "Junior", experience: 3, disponibilite: "2026-03-20", disponibiliteLabel: "20 mars 2026", tjmBase: 450 },
+            { id: 12, code: "EPIER", competences: ["Cybersécurité", "ISO 21434", "TARA"], secteurs: ["Automobile", "Défense"], seniorite: "Confirmé", experience: 5, disponibilite: "2026-02-14", disponibiliteLabel: "14 février 2026", tjmBase: 620 },
+            { id: 13, code: "HMICH", competences: ["Propulsion", "Thermique", "CFD"], secteurs: ["Aérospatial", "Aéronautique"], seniorite: "Senior", experience: 9, disponibilite: "2026-03-07", disponibiliteLabel: "7 mars 2026", tjmBase: 690 },
+            { id: 14, code: "YPETI", competences: ["IHM", "Ergonomie", "Qt/QML"], secteurs: ["Aéronautique", "Automobile", "Défense"], seniorite: "Confirmé", experience: 6, disponibilite: "2026-02-21", disponibiliteLabel: "21 février 2026", tjmBase: 560 },
+            { id: 15, code: "KLERO", competences: ["Électronique puissance", "Batterie", "BMS"], secteurs: ["Automobile", "Aérospatial"], seniorite: "Junior", experience: 2, disponibilite: "2026-03-12", disponibiliteLabel: "12 mars 2026", tjmBase: 480 }
+        ];
+        
+        const grilleTarifaire = [
+            { duree: "1 mois", remise: 0 },
+            { duree: "3 mois", remise: 8 },
+            { duree: "6 mois", remise: 11 }
+        ];
+        
+        const allCompetences = [...new Set(consultantsData.flatMap(c => c.competences))].sort();
+        const allSecteurs = ["Défense", "Aéronautique", "Aérospatial", "Automobile"];
+        const secteurIcons = { "Défense": "🛡️", "Aéronautique": "✈️", "Aérospatial": "🚀", "Automobile": "🚗" };
+        
+        const Header = ({ client }) => (
+            <header style={{ background: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ background: 'white', borderRadius: '8px', padding: '8px 16px', fontWeight: 'bold', color: '#1a365d', fontSize: '18px' }}>CENTUM T&S</div>
+                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>Portail Partenaires</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <span style={{ color: 'white', fontSize: '14px' }}>Bienvenue, <strong>{client}</strong></span>
+                    <button style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Déconnexion</button>
+                </div>
+            </header>
+        );
+        
+        const Filtres = ({ filters, setFilters, consultantCount, totalCount }) => (
+            <div style={{ background: 'white', padding: '20px 24px', borderRadius: '12px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Secteur d'activité</label>
+                        <select value={filters.secteur} onChange={(e) => setFilters({...filters, secteur: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minWidth: '180px', background: 'white' }}>
+                            <option value="">Tous les secteurs</option>
+                            {allSecteurs.map(s => <option key={s} value={s}>{secteurIcons[s]} {s}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Compétences</label>
+                        <select value={filters.competence} onChange={(e) => setFilters({...filters, competence: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minWidth: '180px', background: 'white' }}>
+                            <option value="">Toutes</option>
+                            {allCompetences.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Séniorité</label>
+                        <select value={filters.seniorite} onChange={(e) => setFilters({...filters, seniorite: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minWidth: '140px', background: 'white' }}>
+                            <option value="">Toutes</option>
+                            <option value="Junior">Junior</option>
+                            <option value="Confirmé">Confirmé</option>
+                            <option value="Senior">Senior</option>
+                        </select>
+                    </div>
+                    <button onClick={() => setFilters({ competence: '', seniorite: '', secteur: '' })} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', fontSize: '13px', cursor: 'pointer', color: '#64748b' }}>✕ Réinitialiser</button>
+                    <div style={{ marginLeft: 'auto', color: '#64748b', fontSize: '14px', background: '#f1f5f9', padding: '10px 16px', borderRadius: '8px' }}>
+                        <strong style={{ color: '#1a365d', fontSize: '18px' }}>{consultantCount}</strong>
+                        <span style={{ color: '#94a3b8' }}> / {totalCount} profils</span>
+                    </div>
+                </div>
+            </div>
+        );
+        
+        const ConsultantCard = ({ consultant, onInteret }) => {
+            const calcTJM = (base, remise) => Math.round(base * (1 - remise / 100));
+            return (
+                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '14px', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)'; }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                            <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#1a365d', letterSpacing: '2px' }}>{consultant.code}</div>
+                            <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>{consultant.seniorite} • {consultant.experience} ans d'exp.</div>
+                        </div>
+                        <div style={{ background: consultant.seniorite === 'Senior' ? '#fef3c7' : consultant.seniorite === 'Confirmé' ? '#dbeafe' : '#dcfce7', color: consultant.seniorite === 'Senior' ? '#92400e' : consultant.seniorite === 'Confirmé' ? '#1e40af' : '#166534', padding: '5px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600' }}>{consultant.seniorite}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {consultant.secteurs.map(s => <span key={s} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', color: '#475569' }}>{secteurIcons[s]} {s}</span>)}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {consultant.competences.map(comp => <span key={comp} style={{ background: '#eff6ff', color: '#1e40af', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' }}>{comp}</span>)}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                        <span style={{ fontSize: '20px' }}>📅</span>
+                        <div>
+                            <div style={{ fontSize: '11px', color: '#166534', fontWeight: '600', textTransform: 'uppercase' }}>Disponible le</div>
+                            <div style={{ fontSize: '15px', color: '#14532d', fontWeight: '600' }}>{consultant.disponibiliteLabel}</div>
+                        </div>
+                    </div>
+                    <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '14px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>Tarif journalier selon engagement</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            {grilleTarifaire.map(g => (
+                                <div key={g.duree} style={{ textAlign: 'center', flex: 1 }}>
+                                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>{g.duree}</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1a365d' }}>{calcTJM(consultant.tjmBase, g.remise)} €</div>
+                                    {g.remise > 0 && <div style={{ fontSize: '10px', color: '#10b981', fontWeight: '600' }}>-{g.remise}%</div>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <button onClick={() => onInteret(consultant)} style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginTop: 'auto' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.4)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                        Je suis intéressé →
+                    </button>
+                </div>
+            );
+        };
+        
+        const TimelineView = ({ consultants, onInteret }) => {
+            const startDate = new Date('2026-02-01');
+            const days = [];
+            for (let i = 0; i < 56; i++) {
+                const d = new Date(startDate);
+                d.setDate(d.getDate() + i);
+                days.push(d);
+            }
+            
+            const getDatePosition = (dateStr) => {
+                const date = new Date(dateStr);
+                const diffTime = date - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                return Math.max(0, Math.min(diffDays, 55));
+            };
+            
+            const getSenioriteStyle = (sen) => {
+                if (sen === 'Senior') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+                if (sen === 'Confirmé') return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };
+                return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
+            };
+            
+            const sortedConsultants = [...consultants].sort((a, b) => new Date(a.disponibilite) - new Date(b.disponibilite));
+            const dayWidth = 22;
+            
+            return (
+                <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                    <div style={{ background: '#1a365d', color: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '24px' }}>📅</span>
+                            <div>
+                                <div style={{ fontWeight: '600', fontSize: '16px' }}>Planning des disponibilités</div>
+                                <div style={{ fontSize: '12px', opacity: 0.8 }}>Cliquez sur un marqueur pour exprimer votre intérêt</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '16px', fontSize: '12px' }}>
+                            {['Senior', 'Confirmé', 'Junior'].map(s => {
+                                const st = getSenioriteStyle(s);
+                                return <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <div style={{ width: '12px', height: '12px', background: st.bg, border: `2px solid ${st.border}`, borderRadius: '3px' }}></div>{s}
+                                </div>;
+                            })}
+                        </div>
+                    </div>
+                    
+                    <div style={{ overflowX: 'auto' }}>
+                        <div style={{ minWidth: `${280 + days.length * dayWidth}px` }}>
+                            {/* Header mois */}
+                            <div style={{ display: 'flex', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                <div style={{ width: '280px', flexShrink: 0 }}></div>
+                                <div style={{ display: 'flex', flex: 1 }}>
+                                    <div style={{ width: `${28 * dayWidth}px`, textAlign: 'center', padding: '10px', fontWeight: '700', color: '#1a365d', borderRight: '2px solid #1a365d', fontSize: '13px' }}>FÉVRIER 2026</div>
+                                    <div style={{ width: `${28 * dayWidth}px`, textAlign: 'center', padding: '10px', fontWeight: '700', color: '#1a365d', fontSize: '13px' }}>MARS 2026</div>
+                                </div>
+                            </div>
+                            
+                            {/* Header jours */}
+                            <div style={{ display: 'flex', borderBottom: '2px solid #e2e8f0' }}>
+                                <div style={{ width: '280px', flexShrink: 0, padding: '8px 16px', fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', background: '#f8fafc' }}>Consultant</div>
+                                <div style={{ display: 'flex' }}>
+                                    {days.map((d, i) => {
+                                        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                                        const isFirst = d.getDate() === 1;
+                                        return <div key={i} style={{ width: `${dayWidth}px`, textAlign: 'center', padding: '6px 0', fontSize: '10px', color: isWeekend ? '#cbd5e1' : '#64748b', background: isWeekend ? '#f1f5f9' : 'white', borderLeft: isFirst ? '2px solid #1a365d' : 'none', fontWeight: isFirst ? '700' : '400' }}>{d.getDate()}</div>;
+                                    })}
+                                </div>
+                            </div>
+                            
+                            {/* Consultants */}
+                            {sortedConsultants.map((c, idx) => {
+                                const pos = getDatePosition(c.disponibilite);
+                                const style = getSenioriteStyle(c.seniorite);
+                                const dateObj = new Date(c.disponibilite);
+                                const dateFormatted = dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                
+                                return (
+                                    <div key={c.id} style={{ display: 'flex', borderBottom: '1px solid #f1f5f9', background: idx % 2 === 0 ? 'white' : '#fafbfc' }}>
+                                        <div style={{ width: '280px', flexShrink: 0, padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '12px', borderRight: '1px solid #e2e8f0' }}>
+                                            <div style={{ background: style.bg, border: `2px solid ${style.border}`, color: style.text, padding: '6px 10px', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', minWidth: '58px', textAlign: 'center' }}>{c.code}</div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ fontSize: '12px', color: '#374151', fontWeight: '500' }}>{c.seniorite} • {c.experience} ans</div>
+                                                <div style={{ fontSize: '10px', color: '#9ca3af', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.secteurs.map(s => secteurIcons[s]).join(' ')} {c.competences[0]}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style={{ position: 'relative', height: '52px', flex: 1 }}>
+                                            {/* Background weekends */}
+                                            <div style={{ display: 'flex', height: '100%', position: 'absolute', left: 0, right: 0 }}>
+                                                {days.map((d, i) => {
+                                                    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                                                    const isFirst = d.getDate() === 1;
+                                                    return <div key={i} style={{ width: `${dayWidth}px`, background: isWeekend ? 'rgba(241,245,249,0.7)' : 'transparent', borderLeft: isFirst ? '2px solid #e2e8f0' : 'none' }}></div>;
+                                                })}
+                                            </div>
+                                            
+                                            {/* Marqueur */}
+                                            <div onClick={() => onInteret(c)} style={{ position: 'absolute', left: `${pos * dayWidth - 1}px`, top: '4px', bottom: '4px', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center' }}>
+                                                {/* Ligne verticale avec point */}
+                                                <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                    <div style={{ width: '14px', height: '14px', background: style.border, borderRadius: '50%', border: '3px solid white', boxShadow: `0 0 0 2px ${style.border}, 0 2px 8px rgba(0,0,0,0.3)`, zIndex: 2 }}></div>
+                                                    <div style={{ width: '3px', height: '28px', background: `linear-gradient(to bottom, ${style.border}, ${style.border}90)`, marginTop: '-2px' }}></div>
+                                                </div>
+                                                
+                                                {/* Tooltip */}
+                                                <div style={{ marginLeft: '8px', background: style.bg, border: `2px solid ${style.border}`, borderRadius: '8px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', whiteSpace: 'nowrap', transition: 'transform 0.15s' }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                                                    <div style={{ fontWeight: '700', color: style.text, fontSize: '12px' }}>{dateFormatted}</div>
+                                                    <div style={{ width: '1px', height: '20px', background: style.border, opacity: 0.3 }}></div>
+                                                    <div style={{ fontSize: '12px' }}>
+                                                        <span style={{ fontWeight: '700', color: style.text }}>{c.tjmBase}€</span>
+                                                        <span style={{ color: '#10b981', fontWeight: '600', marginLeft: '4px' }}>→ {Math.round(c.tjmBase * 0.89)}€</span>
+                                                    </div>
+                                                    <div style={{ background: style.border, color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: '600' }}>RÉSERVER</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    
+                    <div style={{ padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
+                        <div>💡 Tarifs affichés : TJM de base → TJM avec engagement 6 mois (-11%)</div>
+                        <div>Aujourd'hui : 29 janvier 2026</div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const ViewToggle = ({ view, setView }) => (
+            <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '10px', padding: '4px' }}>
+                {[{id: 'cards', icon: '▦', label: 'Fiches'}, {id: 'timeline', icon: '📅', label: 'Planning'}].map(v => (
+                    <button key={v.id} onClick={() => setView(v.id)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: view === v.id ? 'white' : 'transparent', color: view === v.id ? '#1a365d' : '#64748b', fontWeight: view === v.id ? '600' : '400', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: view === v.id ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>
+                        <span>{v.icon}</span> {v.label}
+                    </button>
+                ))}
+            </div>
+        );
+        
+        const ModalInteret = ({ consultant, onClose, onSubmit }) => {
+            const [duree, setDuree] = useState('3 mois');
+            const [dateDebut, setDateDebut] = useState('');
+            const [commentaire, setCommentaire] = useState('');
+            if (!consultant) return null;
+            
+            return (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+                    <div style={{ background: 'white', borderRadius: '20px', padding: '32px', maxWidth: '480px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ fontSize: '20px', color: '#1a365d', margin: 0 }}>Exprimer mon intérêt</h2>
+                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#94a3b8' }}>×</button>
+                        </div>
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div style={{ background: '#1a365d', color: 'white', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>{consultant.code}</div>
+                            <div>
+                                <div style={{ fontWeight: '600', color: '#1a365d' }}>{consultant.seniorite} • {consultant.experience} ans</div>
+                                <div style={{ fontSize: '13px', color: '#64748b' }}>{consultant.competences.join(', ')}</div>
+                                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{consultant.secteurs.map(s => `${secteurIcons[s]} ${s}`).join(' • ')}</div>
+                            </div>
+                        </div>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Durée d'engagement souhaitée</label>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                {['1 mois', '3 mois', '6 mois', 'Autre'].map(d => (
+                                    <button key={d} onClick={() => setDuree(d)} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: duree === d ? '2px solid #2563eb' : '1px solid #e2e8f0', background: duree === d ? '#eff6ff' : 'white', color: duree === d ? '#1d4ed8' : '#64748b', fontWeight: duree === d ? '600' : '400', cursor: 'pointer', fontSize: '14px' }}>{d}</button>
+                                ))}
+                            </div>
+                        </div>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Date de début estimée</label>
+                            <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px' }} />
+                        </div>
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Commentaire (optionnel)</label>
+                            <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} placeholder="Précisions sur le besoin, contexte mission..." style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minHeight: '100px', resize: 'vertical', fontFamily: 'inherit' }} />
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button onClick={onClose} style={{ flex: 1, padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', fontSize: '15px', cursor: 'pointer', color: '#64748b' }}>Annuler</button>
+                            <button onClick={() => onSubmit({ consultant, duree, dateDebut, commentaire })} style={{ flex: 2, padding: '14px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>Envoyer ma demande</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const ModalConfirmation = ({ onClose }) => (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+                <div style={{ background: 'white', borderRadius: '20px', padding: '40px', maxWidth: '400px', width: '90%', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ width: '72px', height: '72px', background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: '36px' }}>✓</div>
+                    <h2 style={{ fontSize: '22px', color: '#1a365d', marginBottom: '12px' }}>Demande envoyée !</h2>
+                    <p style={{ color: '#64748b', marginBottom: '24px', lineHeight: '1.6' }}>Votre expression d'intérêt a été transmise à l'équipe Centum. Vous serez recontacté très prochainement.</p>
+                    <button onClick={onClose} style={{ padding: '14px 32px', borderRadius: '10px', border: 'none', background: '#1a365d', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>Fermer</button>
+                </div>
+            </div>
+        );
+        
+        const RequestCard = ({ onRequest, hasResults, filters }) => {
+            const hasActiveFilters = filters.secteur || filters.competence || filters.seniorite;
+            return (
+                <div style={{ 
+                    background: hasResults ? 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' : 'white',
+                    borderRadius: '16px', 
+                    padding: '28px', 
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.08)', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '16px',
+                    border: '2px dashed #cbd5e1',
+                    minHeight: hasResults ? 'auto' : '300px',
+                    justifyContent: 'center',
+                    alignItems: hasResults ? 'flex-start' : 'center',
+                    textAlign: hasResults ? 'left' : 'center'
+                }}>
+                    <div style={{ fontSize: '36px' }}>{hasResults ? '💬' : '🔍'}</div>
+                    <div>
+                        <div style={{ fontSize: '18px', fontWeight: '600', color: '#1a365d', marginBottom: '8px' }}>
+                            {hasResults ? 'Besoin d\'un autre profil ?' : 'Aucun profil ne correspond'}
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.5' }}>
+                            {hasResults 
+                                ? 'Décrivez-nous votre besoin, nous reviendrons vers vous avec des profils adaptés.'
+                                : hasActiveFilters 
+                                    ? 'Vos critères sont très spécifiques. Faites-nous une demande personnalisée !'
+                                    : 'Décrivez votre besoin idéal et nous chercherons pour vous.'}
+                        </div>
+                    </div>
+                    {hasActiveFilters && !hasResults && (
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {filters.secteur && <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{secteurIcons[filters.secteur]} {filters.secteur}</span>}
+                            {filters.competence && <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{filters.competence}</span>}
+                            {filters.seniorite && <span style={{ background: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{filters.seniorite}</span>}
+                        </div>
+                    )}
+                    <button onClick={onRequest} style={{ 
+                        background: hasResults ? 'white' : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                        color: hasResults ? '#1a365d' : 'white',
+                        border: hasResults ? '2px solid #1a365d' : 'none',
+                        padding: '12px 24px', 
+                        borderRadius: '10px', 
+                        fontSize: '14px', 
+                        fontWeight: '600', 
+                        cursor: 'pointer',
+                        marginTop: '8px',
+                        transition: 'transform 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.03)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                        Faire une demande personnalisée →
+                    </button>
+                </div>
+            );
+        };
+        
+        const ModalRequest = ({ onClose, onSubmit, filters }) => {
+            const [secteurs, setSecteurs] = useState(filters.secteur ? [filters.secteur] : []);
+            const [competences, setCompetences] = useState(filters.competence || '');
+            const [seniorite, setSeniorite] = useState(filters.seniorite || '');
+            const [dateDebut, setDateDebut] = useState('');
+            const [duree, setDuree] = useState('3 mois');
+            const [commentaire, setCommentaire] = useState('');
+            
+            const toggleSecteur = (s) => {
+                if (secteurs.includes(s)) {
+                    setSecteurs(secteurs.filter(x => x !== s));
+                } else {
+                    setSecteurs([...secteurs, s]);
+                }
+            };
+            
+            return (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+                    <div style={{ background: 'white', borderRadius: '20px', padding: '32px', maxWidth: '520px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ fontSize: '20px', color: '#1a365d', margin: 0 }}>Demande personnalisée</h2>
+                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#94a3b8' }}>×</button>
+                        </div>
+                        
+                        <div style={{ background: '#eff6ff', padding: '14px', borderRadius: '10px', marginBottom: '24px', fontSize: '13px', color: '#1e40af', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '18px' }}>💡</span>
+                            <span>Décrivez votre besoin idéal. L'équipe Centum reviendra vers vous sous 24h avec des propositions adaptées.</span>
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '10px' }}>Secteurs d'activité souhaités</label>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                {allSecteurs.map(s => (
+                                    <button key={s} onClick={() => toggleSecteur(s)} style={{ 
+                                        padding: '10px 14px', 
+                                        borderRadius: '8px', 
+                                        border: secteurs.includes(s) ? '2px solid #2563eb' : '1px solid #e2e8f0', 
+                                        background: secteurs.includes(s) ? '#eff6ff' : 'white', 
+                                        color: secteurs.includes(s) ? '#1d4ed8' : '#64748b', 
+                                        fontWeight: secteurs.includes(s) ? '600' : '400', 
+                                        cursor: 'pointer', 
+                                        fontSize: '13px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}>
+                                        {secteurIcons[s]} {s}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Compétences recherchées</label>
+                            <input type="text" value={competences} onChange={(e) => setCompetences(e.target.value)} placeholder="Ex: Archi. électronique, Safety, AUTOSAR..." style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px' }} />
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Séniorité</label>
+                                <select value={seniorite} onChange={(e) => setSeniorite(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', background: 'white' }}>
+                                    <option value="">Peu importe</option>
+                                    <option value="Junior">Junior</option>
+                                    <option value="Confirmé">Confirmé</option>
+                                    <option value="Senior">Senior</option>
+                                </select>
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Durée estimée</label>
+                                <select value={duree} onChange={(e) => setDuree(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', background: 'white' }}>
+                                    <option value="1 mois">1 mois</option>
+                                    <option value="3 mois">3 mois</option>
+                                    <option value="6 mois">6 mois</option>
+                                    <option value="12 mois+">12 mois+</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Date de début souhaitée</label>
+                            <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px' }} />
+                        </div>
+                        
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Contexte de la mission (optionnel)</label>
+                            <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} placeholder="Décrivez le projet, l'environnement technique, les enjeux..." style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minHeight: '100px', resize: 'vertical', fontFamily: 'inherit' }} />
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button onClick={onClose} style={{ flex: 1, padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', fontSize: '15px', cursor: 'pointer', color: '#64748b' }}>Annuler</button>
+                            <button onClick={() => { onSubmit({ secteurs, competences, seniorite, duree, dateDebut, commentaire }); }} style={{ flex: 2, padding: '14px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>Envoyer ma demande</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const App = () => {
+            const [filters, setFilters] = useState({ competence: '', seniorite: '', secteur: '' });
+            const [selectedConsultant, setSelectedConsultant] = useState(null);
+            const [showConfirmation, setShowConfirmation] = useState(false);
+            const [view, setView] = useState('cards');
+            
+            const [showRequestModal, setShowRequestModal] = useState(false);
+            
+            const filteredConsultants = consultantsData.filter(c => {
+                if (filters.competence && !c.competences.includes(filters.competence)) return false;
+                if (filters.seniorite && c.seniorite !== filters.seniorite) return false;
+                if (filters.secteur && !c.secteurs.includes(filters.secteur)) return false;
+                return true;
+            });
+            
+            const handleSubmit = (data) => {
+                console.log('Demande envoyée:', data);
+                setSelectedConsultant(null);
+                setShowConfirmation(true);
+            };
+            
+            return (
+                <div style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+                    <Header client="Airbus Defence & Space" />
+                    <main style={{ padding: '32px', maxWidth: '1600px', margin: '0 auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                            <div>
+                                <h1 style={{ fontSize: '28px', color: '#1a365d', marginBottom: '8px' }}>Profils disponibles</h1>
+                                <p style={{ color: '#64748b' }}>Consultez les profils et exprimez votre intérêt pour réserver en priorité.</p>
+                            </div>
+                            <ViewToggle view={view} setView={setView} />
+                        </div>
+                        <Filtres filters={filters} setFilters={setFilters} consultantCount={filteredConsultants.length} totalCount={consultantsData.length} />
+                        {view === 'cards' ? (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                                {filteredConsultants.map(c => <ConsultantCard key={c.id} consultant={c} onInteret={setSelectedConsultant} />)}
+                                <RequestCard onRequest={() => setShowRequestModal(true)} hasResults={filteredConsultants.length > 0} filters={filters} />
+                            </div>
+                        ) : (
+                            <>
+                                <TimelineView consultants={filteredConsultants} onInteret={setSelectedConsultant} />
+                                <div style={{ marginTop: '20px' }}>
+                                    <RequestCard onRequest={() => setShowRequestModal(true)} hasResults={filteredConsultants.length > 0} filters={filters} />
+                                </div>
+                            </>
+                        )}
+                    </main>
+                    <footer style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '13px', borderTop: '1px solid #e2e8f0', marginTop: '40px' }}>Portail Partenaires Centum T&S • Propulsé par SalesAiFlo</footer>
+                    {selectedConsultant && <ModalInteret consultant={selectedConsultant} onClose={() => setSelectedConsultant(null)} onSubmit={handleSubmit} />}
+                    {showConfirmation && <ModalConfirmation onClose={() => setShowConfirmation(false)} />}
+                    {showRequestModal && <ModalRequest filters={filters} onClose={() => setShowRequestModal(false)} onSubmit={(data) => { console.log('Demande personnalisée:', data); setShowRequestModal(false); setShowConfirmation(true); }} />}
+                </div>
+            );
+        };
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
