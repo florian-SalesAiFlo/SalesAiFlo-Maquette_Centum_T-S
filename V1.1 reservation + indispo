@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Partenaires - Centum T&S</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; min-height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState } = React;
+        
+        // Données enrichies avec périodes de disponibilité/indisponibilité
+        const consultantsData = [
+            { 
+                id: 1, code: "FLEGA", 
+                competences: ["Archi. électronique", "Safety", "Ing. Système"], 
+                secteurs: ["Aéronautique", "Défense", "Aérospatial"], 
+                seniorite: "Senior", experience: 8, tjmBase: 650,
+                periodes: [
+                    { debut: "2026-02-10", fin: "2026-03-14", type: "dispo" },
+                    { debut: "2026-03-15", fin: "2026-03-28", type: "indispo" },
+                    { debut: "2026-03-29", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 2, code: "MDUPO", 
+                competences: ["Concepteur HW", "Test & Mesure", "Validation"], 
+                secteurs: ["Automobile", "Aéronautique"], 
+                seniorite: "Confirmé", experience: 5, tjmBase: 550,
+                periodes: [
+                    { debut: "2026-02-01", fin: "2026-02-28", type: "indispo" },
+                    { debut: "2026-03-01", fin: "2026-04-15", type: "dispo" },
+                    { debut: "2026-04-16", fin: "2026-04-30", type: "indispo" },
+                    { debut: "2026-05-01", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 3, code: "PMART", 
+                competences: ["Ing. Système", "MBSE", "Requirements"], 
+                secteurs: ["Aérospatial"], 
+                seniorite: "Junior", experience: 2, tjmBase: 420,
+                periodes: [
+                    { debut: "2026-02-01", fin: "2026-03-14", type: "indispo" },
+                    { debut: "2026-03-15", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 4, code: "SBERN", 
+                competences: ["Archi. électronique", "EMC", "Certification"], 
+                secteurs: ["Défense", "Aéronautique", "Aérospatial"], 
+                seniorite: "Senior", experience: 12, tjmBase: 720,
+                periodes: [
+                    { debut: "2026-02-10", fin: "2026-02-28", type: "dispo" },
+                    { debut: "2026-03-01", fin: "2026-03-07", type: "indispo" },
+                    { debut: "2026-03-08", fin: "2026-04-30", type: "dispo" },
+                    { debut: "2026-05-01", fin: "2026-05-15", type: "indispo" },
+                    { debut: "2026-05-16", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 5, code: "TROUX", 
+                competences: ["Test & Mesure", "Banc de test", "LabVIEW"], 
+                secteurs: ["Automobile", "Aéronautique"], 
+                seniorite: "Confirmé", experience: 6, tjmBase: 580,
+                periodes: [
+                    { debut: "2026-02-25", fin: "2026-04-10", type: "dispo" },
+                    { debut: "2026-04-11", fin: "2026-04-25", type: "indispo" },
+                    { debut: "2026-04-26", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 6, code: "AGARC", 
+                competences: ["Software embarqué", "C/C++", "AUTOSAR"], 
+                secteurs: ["Automobile"], 
+                seniorite: "Senior", experience: 10, tjmBase: 680,
+                periodes: [
+                    { debut: "2026-02-17", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 7, code: "LMONN", 
+                competences: ["Certification DO-178", "Safety", "ARP4754"], 
+                secteurs: ["Aéronautique", "Aérospatial"], 
+                seniorite: "Senior", experience: 15, tjmBase: 750,
+                periodes: [
+                    { debut: "2026-02-01", fin: "2026-03-02", type: "indispo" },
+                    { debut: "2026-03-03", fin: "2026-03-31", type: "dispo" },
+                    { debut: "2026-04-01", fin: "2026-04-14", type: "indispo" },
+                    { debut: "2026-04-15", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 8, code: "JDURA", 
+                competences: ["Mécatronique", "Simulation", "CATIA"], 
+                secteurs: ["Automobile", "Aéronautique"], 
+                seniorite: "Confirmé", experience: 4, tjmBase: 520,
+                periodes: [
+                    { debut: "2026-02-12", fin: "2026-03-20", type: "dispo" },
+                    { debut: "2026-03-21", fin: "2026-04-05", type: "indispo" },
+                    { debut: "2026-04-06", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 9, code: "CVASS", 
+                competences: ["Radar", "Traitement signal", "RF"], 
+                secteurs: ["Défense"], 
+                seniorite: "Senior", experience: 11, tjmBase: 700,
+                periodes: [
+                    { debut: "2026-02-01", fin: "2026-03-09", type: "indispo" },
+                    { debut: "2026-03-10", fin: "2026-05-15", type: "dispo" },
+                    { debut: "2026-05-16", fin: "2026-05-31", type: "indispo" }
+                ]
+            },
+            { 
+                id: 10, code: "NBOUD", 
+                competences: ["Ing. Système", "SysML", "DOORS"], 
+                secteurs: ["Aérospatial", "Défense"], 
+                seniorite: "Confirmé", experience: 7, tjmBase: 590,
+                periodes: [
+                    { debut: "2026-02-28", fin: "2026-04-30", type: "dispo" },
+                    { debut: "2026-05-01", fin: "2026-05-10", type: "indispo" },
+                    { debut: "2026-05-11", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 11, code: "RFONT", 
+                competences: ["Validation", "HIL", "Banc de test"], 
+                secteurs: ["Automobile"], 
+                seniorite: "Junior", experience: 3, tjmBase: 450,
+                periodes: [
+                    { debut: "2026-02-01", fin: "2026-03-19", type: "indispo" },
+                    { debut: "2026-03-20", fin: "2026-05-31", type: "dispo" }
+                ]
+            },
+            { 
+                id: 12, code: "EPIER", 
+                competences: ["Cybersécurité", "ISO 21434", "TARA"], 
+                secteurs: ["Automobile", "Défense"], 
+                seniorite: "Confirmé", experience: 5, tjmBase: 620,
+                periodes: [
+                    { debut: "2026-02-14", fin: "2026-03-31", type: "dispo" },
+                    { debut: "2026-04-01", fin: "2026-04-20", type: "indispo" },
+                    { debut: "2026-04-21", fin: "2026-05-31", type: "dispo" }
+                ]
+            }
+        ];
+        
+        const grilleTarifaire = [
+            { duree: "1 mois", remise: 0 },
+            { duree: "3 mois", remise: 8 },
+            { duree: "6 mois", remise: 11 }
+        ];
+        
+        const allCompetences = [...new Set(consultantsData.flatMap(c => c.competences))].sort();
+        const allSecteurs = ["Défense", "Aéronautique", "Aérospatial", "Automobile"];
+        const secteurIcons = { "Défense": "🛡️", "Aéronautique": "✈️", "Aérospatial": "🚀", "Automobile": "🚗" };
+        
+        const Header = ({ client }) => (
+            <header style={{ background: 'linear-gradient(135deg, #1a365d 0%, #2c5282 100%)', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ background: 'white', borderRadius: '8px', padding: '8px 16px', fontWeight: 'bold', color: '#1a365d', fontSize: '18px' }}>CENTUM T&S</div>
+                    <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>Portail Partenaires</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <span style={{ color: 'white', fontSize: '14px' }}>Bienvenue, <strong>{client}</strong></span>
+                    <button style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontSize: '13px' }}>Déconnexion</button>
+                </div>
+            </header>
+        );
+        
+        const Filtres = ({ filters, setFilters, consultantCount, totalCount }) => (
+            <div style={{ background: 'white', padding: '20px 24px', borderRadius: '12px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Secteur d'activité</label>
+                        <select value={filters.secteur} onChange={(e) => setFilters({...filters, secteur: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minWidth: '180px', background: 'white' }}>
+                            <option value="">Tous les secteurs</option>
+                            {allSecteurs.map(s => <option key={s} value={s}>{secteurIcons[s]} {s}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Compétences</label>
+                        <select value={filters.competence} onChange={(e) => setFilters({...filters, competence: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minWidth: '180px', background: 'white' }}>
+                            <option value="">Toutes</option>
+                            {allCompetences.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Séniorité</label>
+                        <select value={filters.seniorite} onChange={(e) => setFilters({...filters, seniorite: e.target.value})} style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minWidth: '140px', background: 'white' }}>
+                            <option value="">Toutes</option>
+                            <option value="Junior">Junior</option>
+                            <option value="Confirmé">Confirmé</option>
+                            <option value="Senior">Senior</option>
+                        </select>
+                    </div>
+                    <button onClick={() => setFilters({ competence: '', seniorite: '', secteur: '' })} style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #e2e8f0', background: 'white', fontSize: '13px', cursor: 'pointer', color: '#64748b' }}>✕ Réinitialiser</button>
+                    <div style={{ marginLeft: 'auto', color: '#64748b', fontSize: '14px', background: '#f1f5f9', padding: '10px 16px', borderRadius: '8px' }}>
+                        <strong style={{ color: '#1a365d', fontSize: '18px' }}>{consultantCount}</strong>
+                        <span style={{ color: '#94a3b8' }}> / {totalCount} profils</span>
+                    </div>
+                </div>
+            </div>
+        );
+        
+        // Timeline V2 - Style Booking
+        const TimelineBooking = ({ consultants, onReserver }) => {
+            const startDate = new Date('2026-02-01');
+            const endDate = new Date('2026-05-31');
+            const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            
+            const months = [];
+            let currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                const monthKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+                const existingMonth = months.find(m => m.key === monthKey);
+                if (!existingMonth) {
+                    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+                    const startDay = currentDate.getMonth() === startDate.getMonth() && currentDate.getFullYear() === startDate.getFullYear() ? startDate.getDate() : 1;
+                    const endDay = currentDate.getMonth() === endDate.getMonth() && currentDate.getFullYear() === endDate.getFullYear() ? endDate.getDate() : daysInMonth;
+                    months.push({
+                        key: monthKey,
+                        name: currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }),
+                        days: endDay - startDay + 1,
+                        startDay: startDay
+                    });
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            const getDayPosition = (dateStr) => {
+                const date = new Date(dateStr);
+                const diffTime = date - startDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                return Math.max(0, Math.min(diffDays, totalDays - 1));
+            };
+            
+            const getDayWidth = (startStr, endStr) => {
+                const start = new Date(startStr);
+                const end = new Date(endStr);
+                const diffTime = end - start;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                return diffDays;
+            };
+            
+            const getSenioriteStyle = (sen) => {
+                if (sen === 'Senior') return { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' };
+                if (sen === 'Confirmé') return { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' };
+                return { bg: '#dcfce7', border: '#22c55e', text: '#166534' };
+            };
+            
+            const formatDateShort = (dateStr) => {
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+            };
+            
+            const dayWidth = 8;
+            const sortedConsultants = [...consultants].sort((a, b) => {
+                const aFirstDispo = a.periodes.find(p => p.type === 'dispo');
+                const bFirstDispo = b.periodes.find(p => p.type === 'dispo');
+                if (!aFirstDispo) return 1;
+                if (!bFirstDispo) return -1;
+                return new Date(aFirstDispo.debut) - new Date(bFirstDispo.debut);
+            });
+            
+            return (
+                <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                    {/* Header */}
+                    <div style={{ background: '#1a365d', color: 'white', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <span style={{ fontSize: '24px' }}>🗓️</span>
+                            <div>
+                                <div style={{ fontWeight: '600', fontSize: '16px' }}>Planning des disponibilités</div>
+                                <div style={{ fontSize: '12px', opacity: 0.8 }}>Cliquez sur une période verte pour réserver</div>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '20px', fontSize: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: '24px', height: '12px', background: 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)', borderRadius: '3px' }}></div>
+                                Disponible
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <div style={{ width: '24px', height: '12px', background: 'repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 2px, #cbd5e1 2px, #cbd5e1 4px)', borderRadius: '3px' }}></div>
+                                Indisponible
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style={{ overflowX: 'auto' }}>
+                        <div style={{ minWidth: `${280 + totalDays * dayWidth}px` }}>
+                            {/* Header mois */}
+                            <div style={{ display: 'flex', background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                                <div style={{ width: '280px', flexShrink: 0, padding: '12px 16px', fontSize: '11px', fontWeight: '600', color: '#64748b', textTransform: 'uppercase', borderRight: '1px solid #e2e8f0' }}>
+                                    Consultant
+                                </div>
+                                <div style={{ display: 'flex' }}>
+                                    {months.map((m, i) => (
+                                        <div key={m.key} style={{
+                                            width: `${m.days * dayWidth}px`,
+                                            textAlign: 'center',
+                                            padding: '12px 0',
+                                            fontWeight: '600',
+                                            color: '#1a365d',
+                                            fontSize: '13px',
+                                            textTransform: 'capitalize',
+                                            borderRight: i < months.length - 1 ? '2px solid #1a365d' : 'none',
+                                            background: i % 2 === 0 ? '#f8fafc' : '#f1f5f9'
+                                        }}>
+                                            {m.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            {/* Consultants */}
+                            {sortedConsultants.map((c, idx) => {
+                                const style = getSenioriteStyle(c.seniorite);
+                                
+                                return (
+                                    <div key={c.id} style={{ display: 'flex', borderBottom: '1px solid #f1f5f9', background: idx % 2 === 0 ? 'white' : '#fafbfc' }}>
+                                        {/* Info consultant */}
+                                        <div style={{ width: '280px', flexShrink: 0, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: '12px', borderRight: '1px solid #e2e8f0' }}>
+                                            <div style={{ background: style.bg, border: `2px solid ${style.border}`, color: style.text, padding: '8px 10px', borderRadius: '8px', fontWeight: 'bold', fontSize: '13px', minWidth: '62px', textAlign: 'center' }}>
+                                                {c.code}
+                                            </div>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{ fontSize: '12px', color: '#374151', fontWeight: '500' }}>
+                                                    {c.seniorite} • {c.experience} ans • <strong>{c.tjmBase}€</strong>/j
+                                                </div>
+                                                <div style={{ fontSize: '10px', color: '#9ca3af', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {c.secteurs.map(s => secteurIcons[s]).join(' ')} {c.competences[0]}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Timeline */}
+                                        <div style={{ position: 'relative', height: '60px', flex: 1, display: 'flex', alignItems: 'center' }}>
+                                            {/* Fond mois */}
+                                            <div style={{ display: 'flex', height: '100%', position: 'absolute', left: 0, right: 0 }}>
+                                                {months.map((m, i) => (
+                                                    <div key={m.key} style={{
+                                                        width: `${m.days * dayWidth}px`,
+                                                        background: i % 2 === 0 ? 'transparent' : 'rgba(241,245,249,0.5)',
+                                                        borderRight: i < months.length - 1 ? '1px solid #e2e8f0' : 'none'
+                                                    }}></div>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* Périodes */}
+                                            {c.periodes.map((p, pIdx) => {
+                                                const left = getDayPosition(p.debut);
+                                                const width = getDayWidth(p.debut, p.fin);
+                                                const isDispo = p.type === 'dispo';
+                                                
+                                                return (
+                                                    <div
+                                                        key={pIdx}
+                                                        onClick={() => isDispo && onReserver(c, p)}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            left: `${left * dayWidth}px`,
+                                                            width: `${width * dayWidth - 2}px`,
+                                                            height: '36px',
+                                                            borderRadius: '6px',
+                                                            cursor: isDispo ? 'pointer' : 'default',
+                                                            background: isDispo 
+                                                                ? 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)'
+                                                                : 'repeating-linear-gradient(45deg, #e2e8f0, #e2e8f0 3px, #cbd5e1 3px, #cbd5e1 6px)',
+                                                            border: isDispo ? '2px solid #15803d' : '1px solid #cbd5e1',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            overflow: 'hidden',
+                                                            transition: isDispo ? 'transform 0.15s, box-shadow 0.15s' : 'none',
+                                                            boxShadow: isDispo ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                                                            zIndex: isDispo ? 2 : 1
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            if (isDispo) {
+                                                                e.currentTarget.style.transform = 'scaleY(1.15)';
+                                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)';
+                                                            }
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            if (isDispo) {
+                                                                e.currentTarget.style.transform = 'scaleY(1)';
+                                                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+                                                            }
+                                                        }}
+                                                    >
+                                                        {isDispo && width > 10 && (
+                                                            <span style={{ 
+                                                                color: 'white', 
+                                                                fontSize: '10px', 
+                                                                fontWeight: '600',
+                                                                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                                                                whiteSpace: 'nowrap',
+                                                                padding: '0 4px'
+                                                            }}>
+                                                                {formatDateShort(p.debut)} → {formatDateShort(p.fin)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    
+                    {/* Footer */}
+                    <div style={{ padding: '14px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#64748b' }}>
+                        <div style={{ display: 'flex', gap: '24px' }}>
+                            <span>💡 Cliquez sur une période <strong style={{ color: '#16a34a' }}>verte</strong> pour réserver ce créneau</span>
+                        </div>
+                        <div>Février → Mai 2026</div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const ViewToggle = ({ view, setView }) => (
+            <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '10px', padding: '4px' }}>
+                <button onClick={() => setView('timeline')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: view === 'timeline' ? 'white' : 'transparent', color: view === 'timeline' ? '#1a365d' : '#64748b', fontWeight: view === 'timeline' ? '600' : '400', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: view === 'timeline' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>
+                    <span>🗓️</span> Planning
+                </button>
+                <button onClick={() => setView('cards')} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: view === 'cards' ? 'white' : 'transparent', color: view === 'cards' ? '#1a365d' : '#64748b', fontWeight: view === 'cards' ? '600' : '400', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: view === 'cards' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none' }}>
+                    <span>▦</span> Fiches
+                </button>
+            </div>
+        );
+        
+        const ConsultantCard = ({ consultant, onInteret }) => {
+            const calcTJM = (base, remise) => Math.round(base * (1 - remise / 100));
+            const firstDispo = consultant.periodes.find(p => p.type === 'dispo');
+            
+            return (
+                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '14px', transition: 'transform 0.2s, box-shadow 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)'; }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div>
+                            <div style={{ fontSize: '26px', fontWeight: 'bold', color: '#1a365d', letterSpacing: '2px' }}>{consultant.code}</div>
+                            <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>{consultant.seniorite} • {consultant.experience} ans d'exp.</div>
+                        </div>
+                        <div style={{ background: consultant.seniorite === 'Senior' ? '#fef3c7' : consultant.seniorite === 'Confirmé' ? '#dbeafe' : '#dcfce7', color: consultant.seniorite === 'Senior' ? '#92400e' : consultant.seniorite === 'Confirmé' ? '#1e40af' : '#166534', padding: '5px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600' }}>{consultant.seniorite}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {consultant.secteurs.map(s => <span key={s} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '4px 8px', borderRadius: '4px', fontSize: '11px', color: '#475569' }}>{secteurIcons[s]} {s}</span>)}
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {consultant.competences.map(comp => <span key={comp} style={{ background: '#eff6ff', color: '#1e40af', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '500' }}>{comp}</span>)}
+                    </div>
+                    
+                    {/* Mini timeline dans la card */}
+                    <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '12px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>Disponibilités</div>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            {consultant.periodes.map((p, i) => {
+                                const isDispo = p.type === 'dispo';
+                                const debut = new Date(p.debut).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                const fin = new Date(p.fin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                                return (
+                                    <span key={i} style={{
+                                        padding: '4px 8px',
+                                        borderRadius: '4px',
+                                        fontSize: '10px',
+                                        fontWeight: '500',
+                                        background: isDispo ? '#dcfce7' : '#f1f5f9',
+                                        color: isDispo ? '#166534' : '#94a3b8',
+                                        border: isDispo ? '1px solid #bbf7d0' : '1px solid #e2e8f0'
+                                    }}>
+                                        {debut} → {fin}
+                                    </span>
+                                );
+                            })}
+                        </div>
+                    </div>
+                    
+                    <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '14px', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginBottom: '10px', textTransform: 'uppercase' }}>Tarif journalier selon engagement</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            {grilleTarifaire.map(g => (
+                                <div key={g.duree} style={{ textAlign: 'center', flex: 1 }}>
+                                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '4px' }}>{g.duree}</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1a365d' }}>{calcTJM(consultant.tjmBase, g.remise)} €</div>
+                                    {g.remise > 0 && <div style={{ fontSize: '10px', color: '#10b981', fontWeight: '600' }}>-{g.remise}%</div>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <button onClick={() => firstDispo && onInteret(consultant, firstDispo)} style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: 'white', border: 'none', padding: '12px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginTop: 'auto' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.4)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                        Réserver ce profil →
+                    </button>
+                </div>
+            );
+        };
+        
+        const ModalReservation = ({ consultant, periode, onClose, onSubmit }) => {
+            const [dateDebut, setDateDebut] = useState(periode?.debut || '');
+            const [dateFin, setDateFin] = useState(periode?.fin || '');
+            const [commentaire, setCommentaire] = useState('');
+            
+            if (!consultant || !periode) return null;
+            
+            const calcTJM = (base, remise) => Math.round(base * (1 - remise / 100));
+            const dureeJours = dateDebut && dateFin ? Math.ceil((new Date(dateFin) - new Date(dateDebut)) / (1000 * 60 * 60 * 24)) + 1 : 0;
+            const dureeMois = dureeJours / 30;
+            const remise = dureeMois >= 6 ? 11 : dureeMois >= 3 ? 8 : 0;
+            const tjmApplique = calcTJM(consultant.tjmBase, remise);
+            
+            return (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+                    <div style={{ background: 'white', borderRadius: '20px', padding: '32px', maxWidth: '520px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ fontSize: '20px', color: '#1a365d', margin: 0 }}>Réserver ce créneau</h2>
+                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#94a3b8' }}>×</button>
+                        </div>
+                        
+                        <div style={{ background: '#f0fdf4', border: '2px solid #22c55e', padding: '16px', borderRadius: '12px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div style={{ background: '#1a365d', color: 'white', width: '56px', height: '56px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>{consultant.code}</div>
+                            <div>
+                                <div style={{ fontWeight: '600', color: '#1a365d' }}>{consultant.seniorite} • {consultant.experience} ans</div>
+                                <div style={{ fontSize: '13px', color: '#64748b' }}>{consultant.competences.join(', ')}</div>
+                                <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: '600', marginTop: '4px' }}>Période disponible : {new Date(periode.debut).toLocaleDateString('fr-FR')} → {new Date(periode.fin).toLocaleDateString('fr-FR')}</div>
+                            </div>
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Date de début</label>
+                                <input type="date" value={dateDebut} min={periode.debut} max={periode.fin} onChange={(e) => setDateDebut(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px' }} />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Date de fin</label>
+                                <input type="date" value={dateFin} min={dateDebut || periode.debut} max={periode.fin} onChange={(e) => setDateFin(e.target.value)} style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px' }} />
+                            </div>
+                        </div>
+                        
+                        {dureeJours > 0 && (
+                            <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '16px', marginBottom: '20px', border: '1px solid #e2e8f0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <div style={{ fontSize: '13px', color: '#64748b' }}>Durée sélectionnée</div>
+                                        <div style={{ fontSize: '18px', fontWeight: '700', color: '#1a365d' }}>{dureeJours} jours ({Math.round(dureeMois * 10) / 10} mois)</div>
+                                    </div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '13px', color: '#64748b' }}>Tarif applicable</div>
+                                        <div style={{ fontSize: '24px', fontWeight: '700', color: '#1a365d' }}>{tjmApplique} €<span style={{ fontSize: '14px', fontWeight: '400' }}>/jour</span></div>
+                                        {remise > 0 && <div style={{ fontSize: '12px', color: '#10b981', fontWeight: '600' }}>-{remise}% appliqué</div>}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div style={{ marginBottom: '24px' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Commentaire (optionnel)</label>
+                            <textarea value={commentaire} onChange={(e) => setCommentaire(e.target.value)} placeholder="Contexte de la mission, environnement technique..." style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '14px', minHeight: '80px', resize: 'vertical', fontFamily: 'inherit' }} />
+                        </div>
+                        
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button onClick={onClose} style={{ flex: 1, padding: '14px', borderRadius: '10px', border: '1px solid #e2e8f0', background: 'white', fontSize: '15px', cursor: 'pointer', color: '#64748b' }}>Annuler</button>
+                            <button onClick={() => onSubmit({ consultant, dateDebut, dateFin, commentaire, tjmApplique })} style={{ flex: 2, padding: '14px', borderRadius: '10px', border: 'none', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>Confirmer la réservation</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const ModalConfirmation = ({ onClose }) => (
+            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+                <div style={{ background: 'white', borderRadius: '20px', padding: '40px', maxWidth: '400px', width: '90%', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
+                    <div style={{ width: '72px', height: '72px', background: '#dcfce7', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', fontSize: '36px' }}>✓</div>
+                    <h2 style={{ fontSize: '22px', color: '#1a365d', marginBottom: '12px' }}>Réservation envoyée !</h2>
+                    <p style={{ color: '#64748b', marginBottom: '24px', lineHeight: '1.6' }}>Votre demande de réservation a été transmise à l'équipe Centum. Vous serez recontacté sous 24h pour confirmer les modalités.</p>
+                    <button onClick={onClose} style={{ padding: '14px 32px', borderRadius: '10px', border: 'none', background: '#1a365d', color: 'white', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>Fermer</button>
+                </div>
+            </div>
+        );
+        
+        const RequestCard = ({ onRequest, hasResults, filters }) => {
+            const hasActiveFilters = filters.secteur || filters.competence || filters.seniorite;
+            return (
+                <div style={{ background: hasResults ? 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)' : 'white', borderRadius: '16px', padding: '28px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: '16px', border: '2px dashed #cbd5e1', minHeight: hasResults ? 'auto' : '300px', justifyContent: 'center', alignItems: hasResults ? 'flex-start' : 'center', textAlign: hasResults ? 'left' : 'center' }}>
+                    <div style={{ fontSize: '36px' }}>{hasResults ? '💬' : '🔍'}</div>
+                    <div>
+                        <div style={{ fontSize: '18px', fontWeight: '600', color: '#1a365d', marginBottom: '8px' }}>{hasResults ? 'Besoin d\'un autre profil ?' : 'Aucun profil ne correspond'}</div>
+                        <div style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.5' }}>{hasResults ? 'Décrivez-nous votre besoin, nous reviendrons vers vous avec des profils adaptés.' : hasActiveFilters ? 'Vos critères sont très spécifiques. Faites-nous une demande personnalisée !' : 'Décrivez votre besoin idéal et nous chercherons pour vous.'}</div>
+                    </div>
+                    {hasActiveFilters && !hasResults && (
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {filters.secteur && <span style={{ background: '#e0f2fe', color: '#0369a1', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{secteurIcons[filters.secteur]} {filters.secteur}</span>}
+                            {filters.competence && <span style={{ background: '#ede9fe', color: '#6d28d9', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{filters.competence}</span>}
+                            {filters.seniorite && <span style={{ background: '#fef3c7', color: '#92400e', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{filters.seniorite}</span>}
+                        </div>
+                    )}
+                    <button onClick={onRequest} style={{ background: hasResults ? 'white' : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', color: hasResults ? '#1a365d' : 'white', border: hasResults ? '2px solid #1a365d' : 'none', padding: '12px 24px', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', marginTop: '8px' }}>Faire une demande personnalisée →</button>
+                </div>
+            );
+        };
+        
+        const App = () => {
+            const [filters, setFilters] = useState({ competence: '', seniorite: '', secteur: '' });
+            const [selectedReservation, setSelectedReservation] = useState(null);
+            const [showConfirmation, setShowConfirmation] = useState(false);
+            const [view, setView] = useState('timeline');
+            const [showRequestModal, setShowRequestModal] = useState(false);
+            
+            const filteredConsultants = consultantsData.filter(c => {
+                if (filters.competence && !c.competences.includes(filters.competence)) return false;
+                if (filters.seniorite && c.seniorite !== filters.seniorite) return false;
+                if (filters.secteur && !c.secteurs.includes(filters.secteur)) return false;
+                return true;
+            });
+            
+            const handleReserver = (consultant, periode) => {
+                setSelectedReservation({ consultant, periode });
+            };
+            
+            const handleSubmitReservation = (data) => {
+                console.log('Réservation envoyée:', data);
+                setSelectedReservation(null);
+                setShowConfirmation(true);
+            };
+            
+            return (
+                <div style={{ minHeight: '100vh', background: '#f5f7fa' }}>
+                    <Header client="Airbus Defence & Space" />
+                    <main style={{ padding: '32px', maxWidth: '1600px', margin: '0 auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                            <div>
+                                <h1 style={{ fontSize: '28px', color: '#1a365d', marginBottom: '8px' }}>Plan de charge partagé</h1>
+                                <p style={{ color: '#64748b' }}>Visualisez les disponibilités et réservez directement les créneaux qui vous intéressent.</p>
+                            </div>
+                            <ViewToggle view={view} setView={setView} />
+                        </div>
+                        <Filtres filters={filters} setFilters={setFilters} consultantCount={filteredConsultants.length} totalCount={consultantsData.length} />
+                        
+                        {view === 'timeline' ? (
+                            <>
+                                <TimelineBooking consultants={filteredConsultants} onReserver={handleReserver} />
+                                <div style={{ marginTop: '20px' }}>
+                                    <RequestCard onRequest={() => setShowRequestModal(true)} hasResults={filteredConsultants.length > 0} filters={filters} />
+                                </div>
+                            </>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+                                {filteredConsultants.map(c => <ConsultantCard key={c.id} consultant={c} onInteret={handleReserver} />)}
+                                <RequestCard onRequest={() => setShowRequestModal(true)} hasResults={filteredConsultants.length > 0} filters={filters} />
+                            </div>
+                        )}
+                    </main>
+                    <footer style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '13px', borderTop: '1px solid #e2e8f0', marginTop: '40px' }}>Portail Partenaires Centum T&S • Propulsé par SalesAiFlo</footer>
+                    
+                    {selectedReservation && <ModalReservation consultant={selectedReservation.consultant} periode={selectedReservation.periode} onClose={() => setSelectedReservation(null)} onSubmit={handleSubmitReservation} />}
+                    {showConfirmation && <ModalConfirmation onClose={() => setShowConfirmation(false)} />}
+                </div>
+            );
+        };
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
